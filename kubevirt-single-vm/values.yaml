@@ -1,0 +1,12 @@
+image:
+  repository: kubevirt
+  name: fedora-cloud-registry-disk-demo
+  tag: latest
+
+service:
+  type: NodePort
+  port: 22
+
+resources:
+    cpu: 1
+    memory: 1024Mi

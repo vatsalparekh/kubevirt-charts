@@ -1,0 +1,51 @@
+apiVersion: kubevirt.io/v1alpha2
+kind: VirtualMachine
+metadata:
+  creationTimestamp: null
+  labels:
+    special: {{ include "vm.name" . }}
+    helm.sh/chart: {{ include "vm.chart" . }}
+    vm.kubevirt.io/instance: {{ .Release.Name }}
+    vm.kubevirt.io/managed-by: {{ .Release.Service }}
+  name: {{ include "vm.fullname" . }}
+spec:
+  running: True
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        special: {{ include "vm.name" . }}
+        helm.sh/chart: {{ include "vm.chart" . }}
+        vm.kubevirt.io/instance: {{ .Release.Name }}
+        vm.kubevirt.io/managed-by: {{ .Release.Service }}
+    spec:
+      domain:
+        cpu:
+          cores: {{ .Values.resources.cpu }}
+        devices:
+          disks:
+          - disk:
+              bus: virtio
+            name: registrydisk
+            volumeName: registryvolume
+          - disk:
+              bus: virtio
+            name: cloudinitdisk
+            volumeName: cloudinitvolume
+        machine:
+          type: ""
+        resources:
+          requests:
+            memory: {{ .Values.resources.memory }}
+      terminationGracePeriodSeconds: 0
+      volumes:
+        - cloudInitNoCloud:
+            userData: |-
+              #cloud-config
+              password: fedora
+              chpasswd: { expire: False }
+          name: cloudinitvolume
+        - name: registryvolume
+          registryDisk:
+            image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+status: {}
